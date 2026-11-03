@@ -11,6 +11,7 @@ export default function AuthenticatedLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="patients" />
+      <Stack.Screen name="classifications" />
     </Stack>
   );
 }

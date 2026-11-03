@@ -1,7 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Ionicons } from '@expo/vector-icons';
 import { Controller, useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from 'react';
 
 import { ApiError } from '@/src/api/client';
 import { useSession } from '@/src/features/auth/SessionContext';
@@ -10,6 +12,7 @@ import { colors } from '@/src/theme/colors';
 
 export default function LoginScreen() {
   const { login } = useSession();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const { control, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', user_password: '' },
@@ -45,7 +48,20 @@ export default function LoginScreen() {
             <View style={styles.field}>
               <Text style={styles.label}>Contraseña</Text>
               <Controller control={control} name="user_password" render={({ field: { onBlur, onChange, value } }) => (
-                <TextInput accessibilityLabel="Contraseña" autoCapitalize="none" autoComplete="current-password" editable={!isSubmitting} onBlur={onBlur} onChangeText={onChange} placeholder="Mínimo 8 caracteres" placeholderTextColor={colors.textSubtle} secureTextEntry style={[styles.input, errors.user_password && styles.inputError]} value={value} />
+                <View style={[styles.passwordInputContainer, errors.user_password && styles.inputError]}>
+                  <TextInput accessibilityLabel="Contraseña" autoCapitalize="none" autoComplete="current-password" editable={!isSubmitting} onBlur={onBlur} onChangeText={onChange} placeholder="Mínimo 8 caracteres" placeholderTextColor={colors.textSubtle} secureTextEntry={!isPasswordVisible} style={styles.passwordInput} value={value} />
+                  <Pressable
+                    accessibilityLabel={isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: isSubmitting }}
+                    disabled={isSubmitting}
+                    hitSlop={8}
+                    onPress={() => setIsPasswordVisible((visible) => !visible)}
+                    style={styles.visibilityButton}
+                  >
+                    <Ionicons color={colors.textMuted} name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'} size={21} />
+                  </Pressable>
+                </View>
               )} />
               {errors.user_password && <Text style={styles.errorText}>{errors.user_password.message}</Text>}
             </View>
@@ -72,6 +88,9 @@ const styles = StyleSheet.create({
   field: { gap: 8 },
   label: { color: colors.text, fontSize: 14, fontWeight: '700' },
   input: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 12, borderWidth: 1, color: colors.text, fontSize: 16, paddingHorizontal: 14, paddingVertical: 14 },
+  passwordInputContainer: { alignItems: 'center', backgroundColor: colors.background, borderColor: colors.border, borderRadius: 12, borderWidth: 1, flexDirection: 'row' },
+  passwordInput: { color: colors.text, flex: 1, fontSize: 16, paddingHorizontal: 14, paddingVertical: 14 },
+  visibilityButton: { paddingHorizontal: 14, paddingVertical: 12 },
   inputError: { borderColor: colors.danger },
   errorText: { color: colors.danger, fontSize: 12 },
   serverError: { backgroundColor: colors.dangerSoft, borderRadius: 10, color: colors.danger, fontSize: 13, lineHeight: 19, padding: 12 },
